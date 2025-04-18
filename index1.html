@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pure JS WebRTC Chat</title>
+    <style>
+      #notification {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        padding: 10px;
+        margin-bottom: 10px;
+        display: none;
+      }
+      #chat {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>WebRTC Manual Text Chat</h2>
+    <div id="notification">Connection established! Start chatting 🎉</div>
+    <textarea
+      id="offer"
+      placeholder="Paste Offer here"
+      style="width: 100%; height: 100px"
+    ></textarea
+    ><br />
+    <textarea
+      id="answer"
+      placeholder="Paste Answer here"
+      style="width: 100%; height: 100px"
+    ></textarea
+    ><br />
+    <button onclick="createOffer()">Create Offer</button>
+    <button onclick="createAnswer()">Create Answer</button>
+    <button onclick="addAnswer()">Add Answer</button>
+    <hr />
+    <input id="message" placeholder="Type message" />
+    <button onclick="sendMessage()">Send</button>
+    <div id="chat"></div>
+
+    <script>
+      let pc = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      });
+      let channel;
+
+      function log(msg) {
+        document.getElementById("chat").innerHTML += `<div>${msg}</div>`;
+      }
+
+      pc.onicecandidate = (e) => {
+        if (e.candidate) return;
+        document.getElementById("offer").value = JSON.stringify(
+          pc.localDescription
+        );
+      };
+
+      pc.ondatachannel = (event) => {
+        channel = event.channel;
+        channel.onmessage = (e) => log("Peer: " + e.data);
+        channel.onopen = () => showConnectionNotification();
+      };
+
+      function createOffer() {
+        channel = pc.createDataChannel("chat");
+        channel.onmessage = (e) => log("Peer: " + e.data);
+        channel.onopen = () => showConnectionNotification();
+
+        pc.createOffer().then((d) => pc.setLocalDescription(d));
+      }
+
+      function createAnswer() {
+        const offer = JSON.parse(document.getElementById("offer").value);
+        pc.setRemoteDescription(new RTCSessionDescription(offer)).then(() => {
+          pc.createAnswer().then((answer) => {
+            pc.setLocalDescription(answer);
+            document.getElementById("answer").value = JSON.stringify(answer);
+          });
+        });
+      }
+
+      function addAnswer() {
+        const answer = JSON.parse(document.getElementById("answer").value);
+        pc.setRemoteDescription(new RTCSessionDescription(answer)).then(() => {
+          alert("Connection established! You can now start chatting.");
+          showConnectionNotification();
+        });
+      }
+
+      function showConnectionNotification() {
+        document.getElementById("notification").style.display = "block";
+      }
+
+      function sendMessage() {
+        const msg = document.getElementById("message").value;
+        channel.send(msg);
+        log("You: " + msg);
+        document.getElementById("message").value = "";
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Chat Application</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>WebRTC Chat Application</h2>
+      <div id="notification">Connection established! Start chatting 🎉</div>
+
+      <label><strong>Offer:</strong></label>
+      <textarea id="offer" placeholder="Paste Offer here"></textarea>
+
+      <label><strong>Answer:</strong></label>
+      <textarea id="answer" placeholder="Paste Answer here"></textarea>
+
+      <div>
+        <button onclick="createOffer()">Create Offer</button>
+        <button onclick="createAnswer()">Create Answer</button>
+        <button onclick="addAnswer()">Add Answer</button>
+      </div>
+
+      <div id="chat"></div>
+
+      <div class="chat-input">
+        <input id="message" type="text" placeholder="Type message..." />
+        <button
+          class="attach-icon"
+          onclick="document.getElementById('fileInput').click()"
+        >
+          📎
+        </button>
+        <button onclick="sendMessage()">Send</button>
+        <input type="file" id="fileInput" onchange="sendFile()" />
+      </div>
+    </div>
+    <script src="./js/script.js"></script>
+  </body>
+</html>
